@@ -1,0 +1,206 @@
+---
+title: "Student Performance Analysis"
+author: "Miraç Mehmet Yüksel"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+Verimiz; cinsiyet, grup, ailenin eğitim düzeyi,kahvaltı durumu,kurs eğitimi, matematik notu, okuma notu ve yazma notu olmak üzere 8 değişkenden oluşmaktadır. Bu projede ilgili veri seti kullanılarak bazı çıkarımlar yapılacaktır.
+
+### Veriyi inceleyelim. [veri](https://www.kaggle.com/datasets/adithyabshetty100/student-performance)
+
+```{r}
+library(readxl)
+StudentsPerformance <- read_excel("C:/R/studentdata/StudentsPerformance.xls")
+View(StudentsPerformance)
+```
+
+### Verideki cinsiyet oranını inceleyelim.
+
+```{r}
+StudentsPerformance
+gender_freq <- table(StudentsPerformance$gender)
+gender_ratio <- gender_freq / sum(gender_freq)
+gender_ratio
+gender_ratio_pie<- c(0.518,0.482)
+pie(gender_ratio_pie, label=c( "f", "m"))
+```
+
+### Cinsiyete göre matematik notu dağılımını görelim.
+
+```{r}
+library(ggplot2)
+StudentsPerformance
+genderdata<- StudentsPerformance$gender
+math_scoredata<- StudentsPerformance$'math score' 
+ggplot(StudentsPerformance, aes(x =genderdata , y =math_scoredata )) +
+  geom_point()
+```
+
+#### Öğrencilerin cinsiyet bazında matematik notları incelendiğinde en düşük notun bir kız öğrenciye ait olduğu; erkek öğrencilerin en düşük notunun ise 25'ten büyük olduğu görülmektedir.
+
+### Yazma notları ile okuma notları arasındaki ilişkiyi yorumlayalım.
+
+```{r}
+cor.test(StudentsPerformance$`writing score`, StudentsPerformance$`reading score`)
+```
+
+#### Okuma ve yazma notları arasındaki korelasyon katsayısının 0.95 olduğu bulunmuştur. Bu değer bize ilgili sınavların notları arasındaki ilişkinin güçlü ve pozitif yönlü olduğunu göstermektedir. Yani bu verilere göre yazma notu yükseldikçe okuma notu da yükselir diyebiliriz.
+
+### Verideki okuma, yazma ve matematik notlarının ortalamalarına bakalım.
+
+```{r}
+names(StudentsPerformance) <- c( "gender", "group", "parental_loe", "lunch", "course", "mathscore", "readingscore", "writingscore")
+names(StudentsPerformance)
+StudentsPerformance
+
+scores <- c("mathscore", "readingscore", "writingscore")
+colMeans(StudentsPerformance[, scores])
+
+```
+
+#### Not ortalamalarına bakıldığında bu öğrencilerin okuma sınavında yazma ve matematik sınavına göre daha başarılı olduğunu görülmektedir.
+
+### Öğrencilerin grup bazında sınav not ortalamalarını bulalım.
+
+```{r}
+groupA_data <- StudentsPerformance[StudentsPerformance$group == "group A", ]
+groupA_data
+scoresA <- c("mathscore", "readingscore", "writingscore")
+colMeans(groupA_data[, scoresA])
+```
+
+
+```{r}
+groupB_data <- StudentsPerformance[StudentsPerformance$group == "group B", ]
+groupB_data
+scoresB <- c("mathscore", "readingscore", "writingscore")
+colMeans(groupB_data[, scoresB])
+```
+
+```{r}
+groupC_data <- StudentsPerformance[StudentsPerformance$group == "group C", ]
+groupC_data
+scoresC <- c("mathscore", "readingscore", "writingscore")
+colMeans(groupC_data[, scoresC])
+```
+
+```{r}
+groupD_data <- StudentsPerformance[StudentsPerformance$group == "group D", ]
+groupD_data
+scoresD <- c("mathscore", "readingscore", "writingscore")
+colMeans(groupD_data[, scoresD])
+```
+
+### Öğrencilerin gruplarına göre sınav ortalamalarını görelim.
+
+```{r}
+scoremeansA<-colMeans(groupA_data[, scoresA])
+scoremeansB<-colMeans(groupB_data[, scoresB])
+scoremeansC<-colMeans(groupC_data[, scoresC])
+scoremeansD<-colMeans(groupD_data[, scoresD])
+scoremeansA 
+scoremeansB 
+scoremeansC 
+scoremeansD
+```
+
+#### Sonuca bakıldığında D grubunun en yüksek not ortalamalarına sahip olduğu görülürken, A grubunun ise ilgili sınav notlarında en düşük ortalamaya sahip olduğu görülmektedir.
+
+### Öğrencilerin kahvaltı durumuna göre okuma sınavı ortalamalarını bulalım.
+
+```{r}
+lunch_std <- StudentsPerformance[StudentsPerformance$lunch == "standard", ]
+lunch_std
+lunch_std_data <- c("readingscore")
+colMeans(lunch_std[, lunch_std_data])
+
+lunch_free <- StudentsPerformance[StudentsPerformance$lunch == "free/reduced", ]
+lunch_free
+lunch_free_data <- c("readingscore")
+colMeans(lunch_free[, lunch_free_data])
+```
+
+### Öğrencilerin kahvaltı durumlarına göre okuma sınavı ortalamalarını görelim.
+
+```{r}
+lunch_std_mean<-colMeans(lunch_std[, lunch_std_data])
+lunch_free_mean<-colMeans(lunch_free[, lunch_free_data])
+lunch_std_mean
+lunch_free_mean
+```
+
+#### Bulduğumuz sonuçlara göre standart kahvaltı ile beslenen öğrencilerin not ortalaması 71.65 iken azaltılmış kahvaltı ile beslenen öğrencilerin not ortalaması 64.65'tür. Bu durumda da standart kahvaltı ile beslenen öğrencilerin okuma sınavı notlarının, azaltılmış kahvaltı ile beslenen öğrencilerin okuma sınavı notlarından daha yüksek olduğu söylenebilir.
+
+### Öğrencilerin cinsiyet bazında matematik not ortalamalarını bulalım.
+
+```{r}
+gender_female <- StudentsPerformance[StudentsPerformance$gender == "female", ]
+gender_female
+gender_female_ms <- c("mathscore")
+colMeans(gender_female[, gender_female_ms])
+
+gender_male <- StudentsPerformance[StudentsPerformance$gender == "male", ]
+gender_male
+gender_male_ms <- c("mathscore")
+colMeans(gender_male[, gender_male_ms])
+```
+
+### Öğrencilerin cinsiyet bazında matematik not ortalamalarını inceleyelim.
+
+```{r}
+gender_female_mean<-colMeans(gender_female[, gender_female_ms])
+gender_male_mean<-colMeans(gender_male[, gender_male_ms])
+gender_female_mean
+gender_male_mean
+```
+
+#### Bulduğumuz sonuca göre matematik sınavı için erkek öğrencilerin kız öğrencilerden daha başarılı olduğunu söyleyebiliriz.
+
+### Öğrencilerin 3 ders için aldıkları notların ortalamasını yeni bir değişken sütunu olarak ekleyelim.
+
+```{r}
+StudentsPerformance$mean <- rowMeans(StudentsPerformance[, c("mathscore", "readingscore", "writingscore")])
+StudentsPerformance
+```
+
+### Öğrencilerin sınava hazırlık kursunu tamamlama durumlarına göre sınav notları ortalamalarını inceleyelim.
+
+```{r}
+course_none_data <- StudentsPerformance[StudentsPerformance$course == "none", ]
+course_none_data
+score_mean_none <- c("mean")
+colMeans(course_none_data[, score_mean_none])
+
+course_completed_data <- StudentsPerformance[StudentsPerformance$course == "completed", ]
+course_completed_data
+score_mean_comp <- c("mean")
+colMeans(course_completed_data[, score_mean_comp])
+```
+
+#### Sonuca bakıldığında kursa katılmayan öğrencilerin 3 sınavda aldıkları notların ortalaması ortalama 65.03 iken sınava hazırlık kursuna katılan öğrencilerin 3 sınavda aldıkları notların ortalaması ortalama 72.66'dır. Buna göre sınava hazırlık kursunun, öğrencileri ilgili sınavlara hazırlamada pozitif etkisi olduğu çıkarımı yapılabilir.
+
+### Öğrencilerin cinsiyetine göre sınav notu ortalamalarının dağılımı şu şekildedir;
+
+```{r}
+library(ggplot2)
+StudentsPerformance
+ggplot(StudentsPerformance, aes(x = gender, y = mean)) +
+  geom_point()
+
+```
+
+#### Yukarıdaki grafik, öğrencilerin cinsiyet bazında 3 sınavdan aldığı notların ortalamasının dağılımını göstermektedir. Grafikte görüldüğü üzere erkeklerin en düşük ortalamasından da düşük not ortalamasına sahip 2 kız öğrenci vardır.
+#### Not ortalaması 75 ile 100 arasında olan öğrencilere bakıldığında bu aralıkta kız öğrencilerin erkek öğrencilerden daha yoğun olduğunu görüyoruz.
+### Öğrencilerin gruplara göre sınav notu ortalamalarının dağılımı şu şekildedir;
+```{r}
+library(ggplot2)
+StudentsPerformance
+ggplot(StudentsPerformance, aes(x = group, y = mean)) +
+   geom_point()
+```
+
+#### Yukarıdaki grafikte grup bazında öğrencilerin not ortalamalarına ilişkin dağılım görülmektedir. Grafikten görüldüğü üzere en düşük not ortalamasına sahip öğrenci C grubunda bulunmaktadır. En yüksek not ortalamasına sahip öğrenci ise E grubundadır.
+
